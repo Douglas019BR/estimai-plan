@@ -127,24 +127,85 @@ const EstimResults = () => {
       return;
     }
 
-    // Simulate fetching results from S3 bucket
     const fetchResults = async () => {
-      try {
-        setIsLoading(true);
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // In real implementation, this would fetch from S3 using the responseId
-        setEstimationData(mockEstimationData);
-      } catch (error) {
-        toast({
-          title: "Erro ao carregar resultados",
-          description: "Não foi possível carregar os resultados da estimativa.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+      const maxAttempts = 60; 
+      const pollInterval = 20000; // 20 seconds
+      let attempts = 0;
+
+      const poll = async () => {
+        try {
+          attempts++;
+          
+          const bucketUrl = import.meta.env.VITE_S3_BUCKET_URL;
+          const fileUrl = `${bucketUrl}/${responseId}.json`;
+
+          const response = await fetch(fileUrl, {
+            method: 'GET',
+            mode: 'cors'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Process the result field to extract structured JSON
+            let processedData = data;
+            if (data.result && typeof data.result.refined_requirements === 'string') {
+              try {
+                // Try to extract JSON from the text
+                const jsonMatch = data.result.refined_requirements.match(/```json\n([\s\S]*?)\n```/);
+                if (jsonMatch) {
+                  const extractedJson = JSON.parse(jsonMatch[1]);
+                  processedData = {
+                    ...data,
+                    result: extractedJson
+                  };
+                }
+              } catch (parseError) {
+                console.warn('Could not parse embedded JSON, using original structure');
+              }
+            }
+            
+            setEstimationData(processedData);
+            setIsLoading(false);
+            return;
+          } else if (response.status === 404 || response.status === 403) {
+            if (attempts < maxAttempts) {
+              setTimeout(poll, pollInterval);
+              return;
+            }
+          } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          // Max attempts reached
+          throw new Error('Timeout: Results not available after 5 minutes');
+          
+        } catch (error) {
+          console.error('Polling error:', error);
+          
+          if (attempts < maxAttempts && (error.name === 'TypeError' || error.message.includes('404') || error.message.includes('403'))) {
+            // Continue polling on network errors or 404/403 (file not ready)
+            setTimeout(poll, pollInterval);
+          } else if (attempts >= maxAttempts) {
+            // Max attempts reached, fallback to mock data
+            console.log('Max attempts reached, using mock data');
+            setEstimationData(mockEstimationData);
+            setIsLoading(false);
+          } else {
+            // Other errors, show error message
+            toast({
+              title: "Erro ao carregar resultados",
+              description: "Não foi possível carregar os resultados. Usando dados de exemplo.",
+              variant: "destructive",
+            });
+            setEstimationData(mockEstimationData);
+            setIsLoading(false);
+          }
+        }
+      };
+
+      // Start polling
+      poll();
     };
 
     fetchResults();
@@ -267,22 +328,45 @@ const EstimResults = () => {
         {/* Results */}
         {estimationData && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <JsonViewer 
-              data={estimationData.refined_requirements} 
-              title="📋 Épicos Refinados" 
-            />
-            <JsonViewer 
-              data={estimationData.risk_analysis} 
-              title="⚠️ Análise de Riscos" 
-            />
-            <JsonViewer 
-              data={estimationData.tasks} 
-              title="✅ Tarefas Detalhadas" 
-            />
-            <JsonViewer 
-              data={estimationData.work_plan} 
-              title="📅 Plano de Trabalho" 
-            />
+            {estimationData.result ? (
+              <>
+                <JsonViewer 
+                  data={estimationData.result.refined_requirements} 
+                  title="📋 Épicos Refinados" 
+                />
+                <JsonViewer 
+                  data={estimationData.result.risk_analysis} 
+                  title="⚠️ Análise de Riscos" 
+                />
+                <JsonViewer 
+                  data={estimationData.result.tasks} 
+                  title="✅ Tarefas Detalhadas" 
+                />
+                <JsonViewer 
+                  data={estimationData.result.work_plan} 
+                  title="📅 Plano de Trabalho" 
+                />
+              </>
+            ) : (
+              <>
+                <JsonViewer 
+                  data={mockEstimationData.refined_requirements} 
+                  title="📋 Épicos Refinados" 
+                />
+                <JsonViewer 
+                  data={mockEstimationData.risk_analysis} 
+                  title="⚠️ Análise de Riscos" 
+                />
+                <JsonViewer 
+                  data={mockEstimationData.tasks} 
+                  title="✅ Tarefas Detalhadas" 
+                />
+                <JsonViewer 
+                  data={mockEstimationData.work_plan} 
+                  title="📅 Plano de Trabalho" 
+                />
+              </>
+            )}
           </div>
         )}
       </div>

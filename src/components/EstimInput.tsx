@@ -29,24 +29,51 @@ const EstimInput = () => {
     setIsLoading(true);
     
     try {
-      // Simular chamada de API
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const apiUrl = import.meta.env.VITE_API_URL;
       
-      // Simular retorno de ID
-      const responseId = `estim_${Date.now()}`;
-      
-      // Navegar para a página de resultados com o ID
-      navigate('/results', { 
-        state: { 
-          responseId, 
-          requirements, 
-          additionalInfo 
-        } 
-      });
+      if (apiUrl) {
+        const response = await fetch(`${apiUrl}/estimate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            requirements: requirements.trim(),
+            additional_info: additionalInfo.trim()
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const responseId = data.id || data.request_id;
+        
+        navigate('/results', { 
+          state: { 
+            responseId, 
+            requirements, 
+            additionalInfo 
+          } 
+        });
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const responseId = `estim_${Date.now()}`;
+        
+        navigate('/results', { 
+          state: { 
+            responseId, 
+            requirements, 
+            additionalInfo 
+          } 
+        });
+      }
     } catch (error) {
+      console.error('API Error:', error);
       toast({
         title: "Erro na estimativa",
-        description: "Ocorreu um erro ao processar sua solicitação.",
+        description: "Ocorreu um erro ao processar sua solicitação. Tente novamente.",
         variant: "destructive",
       });
     } finally {
