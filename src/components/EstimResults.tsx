@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download, Share2, Bot } from 'lucide-react';
 import JsonViewer from './JsonViewer';
+import ResultsDisplay from './ResultsDisplay';
 import { useToast } from '@/hooks/use-toast';
 
 // Mock data that matches the specified JSON structure
@@ -327,45 +328,11 @@ const EstimResults = () => {
 
         {/* Results */}
         {estimationData && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
             {estimationData.result ? (
-              <>
-                <JsonViewer 
-                  data={estimationData.result.refined_requirements} 
-                  title="📋 Épicos Refinados" 
-                />
-                <JsonViewer 
-                  data={estimationData.result.risk_analysis} 
-                  title="⚠️ Análise de Riscos" 
-                />
-                <JsonViewer 
-                  data={estimationData.result.tasks} 
-                  title="✅ Tarefas Detalhadas" 
-                />
-                <JsonViewer 
-                  data={estimationData.result.work_plan} 
-                  title="📅 Plano de Trabalho" 
-                />
-              </>
+              <ResultsDisplay data={estimationData.result} />
             ) : (
-              <>
-                <JsonViewer 
-                  data={mockEstimationData.refined_requirements} 
-                  title="📋 Épicos Refinados" 
-                />
-                <JsonViewer 
-                  data={mockEstimationData.risk_analysis} 
-                  title="⚠️ Análise de Riscos" 
-                />
-                <JsonViewer 
-                  data={mockEstimationData.tasks} 
-                  title="✅ Tarefas Detalhadas" 
-                />
-                <JsonViewer 
-                  data={mockEstimationData.work_plan} 
-                  title="📅 Plano de Trabalho" 
-                />
-              </>
+              <ResultsDisplay data={mockEstimationData} />
             )}
           </div>
         )}

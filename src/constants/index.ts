@@ -43,7 +43,7 @@ export const TEXTS = {
     submit: 'Gerar Estimativa',
     loading: 'Processando...',
   },
-  
+
   messages: {
     requiredField: 'Este campo é obrigatório',
     processingError: 'Erro ao processar solicitação',
