@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download, Share2, Bot } from 'lucide-react';
 import JsonViewer from './JsonViewer';
@@ -116,11 +116,14 @@ const mockEstimationData = {
 const EstimResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [estimationData, setEstimationData] = useState(null);
 
-  const { responseId, requirements, additionalInfo } = location.state || {};
+  // Get responseId from URL params or location state
+  const responseId = id || location.state?.responseId;
+  const { requirements, additionalInfo } = location.state || {};
 
   useEffect(() => {
     if (!responseId) {
@@ -231,19 +234,21 @@ const EstimResults = () => {
   };
 
   const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/results/${responseId}`;
+    
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'EstimAI - Estimativa de Projeto',
           text: 'Confira esta estimativa gerada pelo EstimAI',
-          url: window.location.href,
+          url: shareUrl,
         });
       } catch (error) {
         // User cancelled sharing
       }
     } else {
       // Fallback to copying URL
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(shareUrl);
       toast({
         title: "Link copiado!",
         description: "O link foi copiado para a área de transferência.",

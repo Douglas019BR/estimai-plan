@@ -50,7 +50,7 @@ const EstimInput = () => {
         const data = await response.json();
         const responseId = data.id || data.request_id;
         
-        navigate('/results', { 
+        navigate(`/results/${responseId}`, { 
           state: { 
             responseId, 
             requirements, 
@@ -61,7 +61,7 @@ const EstimInput = () => {
         await new Promise(resolve => setTimeout(resolve, 2000));
         const responseId = `estim_${Date.now()}`;
         
-        navigate('/results', { 
+        navigate(`/results/${responseId}`, { 
           state: { 
             responseId, 
             requirements, 

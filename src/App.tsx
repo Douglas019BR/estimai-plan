@@ -19,6 +19,7 @@ const App = () => (
         <Routes>
           <Route path={ROUTES.home} element={<EstimInput />} />
           <Route path={ROUTES.results} element={<EstimResults />} />
+          <Route path="/results/:id" element={<EstimResults />} />
           <Route path={ROUTES.notFound} element={<NotFound />} />
         </Routes>
       </BrowserRouter>
