@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, Bot, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { apiService } from '@/services/api';
 
 const EstimInput = () => {
   const [requirements, setRequirements] = useState('');
@@ -32,11 +33,8 @@ const EstimInput = () => {
       const apiUrl = import.meta.env.VITE_API_URL;
       
       if (apiUrl) {
-        const response = await fetch(`${apiUrl}/estimate`, {
+        const response = await apiService.makeRequest(`${apiUrl}/estimate`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             requirements: requirements.trim(),
             additional_info: additionalInfo.trim()

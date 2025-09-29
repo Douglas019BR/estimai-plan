@@ -120,6 +120,7 @@ const EstimResults = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [estimationData, setEstimationData] = useState(null);
+  const [error, setError] = useState(null);
 
   // Get responseId from URL params or location state
   const responseId = id || location.state?.responseId;
@@ -150,6 +151,11 @@ const EstimResults = () => {
 
           if (response.ok) {
             const data = await response.json();
+            
+            // Check if the response contains an error status
+            if (data.status === 'error') {
+              throw new Error(data.error || 'Erro no processamento da estimativa');
+            }
             
             // Process the result field to extract structured JSON
             let processedData = data;
@@ -191,18 +197,12 @@ const EstimResults = () => {
             // Continue polling on network errors or 404/403 (file not ready)
             setTimeout(poll, pollInterval);
           } else if (attempts >= maxAttempts) {
-            // Max attempts reached, fallback to mock data
-            console.log('Max attempts reached, using mock data');
-            setEstimationData(mockEstimationData);
+            // Max attempts reached, show timeout error
+            setError('Timeout: Resultados não disponíveis após 20 minutos. Tente novamente mais tarde.');
             setIsLoading(false);
           } else {
             // Other errors, show error message
-            toast({
-              title: "Erro ao carregar resultados",
-              description: "Não foi possível carregar os resultados. Usando dados de exemplo.",
-              variant: "destructive",
-            });
-            setEstimationData(mockEstimationData);
+            setError(error.message || 'Erro ao carregar resultados. Tente novamente.');
             setIsLoading(false);
           }
         }
@@ -255,6 +255,36 @@ const EstimResults = () => {
       });
     }
   };
+  const errorMessage = 'Infelizmente ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.';
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-6 animate-fade-in max-w-md">
+          <div className="flex items-center justify-center space-x-3">
+            <Bot className="h-12 w-12 text-destructive" />
+            <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              estimAI
+            </h1>
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-destructive">
+              Erro no Processamento
+            </h2>
+            <p className="text-sm text-muted-foreground bg-muted p-4 rounded-lg">
+              {errorMessage}
+            </p>
+            <Button
+              onClick={() => navigate('/')}
+              className="bg-gradient-accent text-white hover:opacity-90"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tentar Novamente
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

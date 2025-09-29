@@ -1,73 +1,131 @@
-# Welcome to your Lovable project
+# EstimAI Frontend
 
-## Project info
+React-based frontend for the EstimAI project estimation system powered by AWS Bedrock and Claude AI.
 
-**URL**: https://lovable.dev/projects/e0877dcb-e523-4819-acfb-5116e21e8ad5
+## Features
 
-## How can I edit this code?
+- **Modern Stack**: React 18 + TypeScript + Vite
+- **UI Components**: Tailwind CSS + Shadcn/ui
+- **Real-time Estimation**: Async processing with live status updates
+- **Secure Integration**: API key authentication with backend
+- **Production Ready**: CloudFront deployment with OAC security
+- **Responsive Design**: Mobile-first approach
 
-There are several ways of editing your application.
+## Architecture
 
-**Use Lovable**
+- **Frontend**: React SPA with TypeScript
+- **Styling**: Tailwind CSS + Shadcn/ui components
+- **State Management**: TanStack Query for server state
+- **Routing**: React Router v6
+- **Build Tool**: Vite for fast development and optimized builds
+- **Deployment**: AWS S3 + CloudFront with Origin Access Control
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e0877dcb-e523-4819-acfb-5116e21e8ad5) and start prompting.
+## Setup
 
-Changes made via Lovable will be committed automatically to this repo.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd estimai-plan
+   ```
 
-**Use your preferred IDE**
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+3. **Environment Configuration**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Update `.env` with your configuration:
+   ```env
+   VITE_API_URL=https://your-api-gateway-url.execute-api.region.amazonaws.com/stage
+   VITE_S3_BUCKET_URL=https://your-results-bucket.s3.region.amazonaws.com/results
+   VITE_API_KEY=your-api-key-here
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Development
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+# Start development server
 npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Lint code
+npm run lint
 ```
 
-**Edit a file directly in GitHub**
+## Deployment Options
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Option 1: Simple S3 Website
+```bash
+./deploy-simple.sh
+```
+- Basic S3 website hosting
+- Public bucket with website configuration
+- HTTP access
 
-**Use GitHub Codespaces**
+### Option 2: CloudFront + OAC (Recommended)
+```bash
+./deploy-cloudfront.sh
+```
+- Private S3 bucket with CloudFront
+- Origin Access Control for security
+- HTTPS enforcement
+- Global CDN distribution
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Security Features
 
-## What technologies are used for this project?
+- **Private S3 Bucket**: No direct public access
+- **Origin Access Control**: Only CloudFront can access S3
+- **API Key Authentication**: Secure backend communication
+- **CORS Protection**: Controlled cross-origin requests
+- **HTTPS Enforcement**: SSL/TLS encryption
+- **Content Security**: Input validation and sanitization
 
-This project is built with:
+## Project Structure
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+src/
+├── components/          # React components
+│   ├── ui/             # Reusable UI components
+│   ├── EstimInput.tsx  # Main estimation form
+│   └── EstimResults.tsx # Results display
+├── hooks/              # Custom React hooks
+├── services/           # API service layer
+├── pages/              # Route components
+├── constants/          # App constants
+└── utils/              # Utility functions
+```
 
-## How can I deploy this project?
+## Key Components
 
-Simply open [Lovable](https://lovable.dev/projects/e0877dcb-e523-4819-acfb-5116e21e8ad5) and click on Share -> Publish.
+- **EstimInput**: Main form for project requirements input
+- **EstimResults**: Real-time results display with polling
+- **JsonViewer**: Formatted JSON display with copy functionality
+- **ResultsDisplay**: Structured estimation breakdown
 
-## Can I connect a custom domain to my Lovable project?
+## API Integration
 
-Yes, you can!
+The frontend communicates with the EstimAI backend through:
+- **POST /estimate**: Submit estimation requests
+- **GET /results/{id}**: Fetch estimation results
+- **Polling mechanism**: Real-time status updates
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Performance Optimizations
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **Code Splitting**: Automatic route-based splitting
+- **Tree Shaking**: Unused code elimination  
+- **Asset Optimization**: Compressed images and fonts
+- **CDN Caching**: CloudFront global edge locations
+- **Lazy Loading**: Components loaded on demand
+
+## License
+
+This project is licensed under the MIT License.

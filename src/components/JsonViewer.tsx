@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
 interface JsonViewerProps {
-  data: any;
+  data: Record<string, unknown>;
   title?: string;
 }
 
